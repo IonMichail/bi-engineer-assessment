@@ -4,12 +4,12 @@ sources:
       date_format: "%Y-%m-%d"
       columns:
         UserID: varchar
-        CountryId: varchar
-        CurrencyId: varchar
+        CountryId: int
+        CurrencyId: int
         Date: date
-        CasinoGameId: varchar
-        CasinoProviderId: varchar
-        CasinoManufacturerId: varchar
+        CasinoGameId: int
+        CasinoProviderId: int
+        CasinoManufacturerId: int
         GGR: float
         Returns: float
     write_config:
@@ -27,7 +27,7 @@ sources:
     write_config:
       table: casino_manufacturers
       transform:
-        CasinoManufacturerId: REPLACE(CasinoManufacturerId, '"', '')
+        CasinoManufacturerId: CAST(REPLACE(CasinoManufacturerId, '"', '') AS INT)
         CasinoManufacturerName: REPLACE(CasinoManufacturerName, '"', '')
         LatestFlag: CAST(REPLACE(LatestFlag, '"', '') AS BOOL)
 
@@ -38,6 +38,8 @@ sources:
         CasinoProviderName: varchar
     write_config:
       table: casino_providers
+      transform:
+        CasinoProviderId: CAST(CasinoProviderId AS INT)
 
   - load_config:
       path_or_buffer: data/currencyrates.csv
@@ -50,6 +52,9 @@ sources:
         EuroRate: float
     write_config:
       table: currency_rates
+      transform:
+        FromCurrencyId: CAST(FromCurrencyId AS INT)
+        ToCurrencyId: CAST(REPLACE(ToCurrencyId, '"', '') AS INT)
 
   - load_config:
       path_or_buffer: data/users.csv
@@ -61,10 +66,11 @@ sources:
         Sex: varchar
         VIPStatus: varchar
         Country: varchar
-        CountryId: varchar
+        CountryId: int
     write_config:
       table: users
       transform:
+        UserID: CAST(UserID AS INT)
         user_id: REPLACE(user_id, '"', '')
         VIPStatus: CASE
           WHEN UPPER(VIPStatus) = 'NOT VIP' THEN UPPER(VIPStatus)
