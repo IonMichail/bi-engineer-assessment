@@ -57,6 +57,8 @@ sources:
         Returns: float
     write_config:
       table: casino_daily
+      transform:
+        UserID: Replace(UserID, '"', '')
 
   - load_config:
       path_or_buffer: data/casinomanufacturers.csv
@@ -95,15 +97,12 @@ sources:
         EuroRate: float
     write_config:
       table: currency_rates
-      transform:
-        FromCurrencyId: CAST(FromCurrencyId AS INT)
-        ToCurrencyId: CAST(ToCurrencyId AS INT)
 
   - load_config:
       path_or_buffer: data/users.csv
       date_format: "%Y-%m-%d"
       columns:
-        UserID: varchar
+        UserID: int
         user_id: varchar
         BirthDate: date
         Sex: varchar
@@ -113,12 +112,7 @@ sources:
     write_config:
       table: users
       transform:
-        UserID: CAST(UserID AS INT)
         user_id: REPLACE(user_id, '"', '')
-        VIPStatus: CASE
-          WHEN UPPER(VIPStatus) = 'NOT VIP' THEN UPPER(VIPStatus)
-          ELSE UPPER(REGEXP_REPLACE(VIPStatus, '(\b)*\s(\b)*', '', 'g'))
-          END
 
 ```
 For each source file the columns are explicitely defined (`columns` field) and a data type is assigned. Columns that could not be cast to an appropriate data type on load are ingested as varchar and the transformations specified in the `write_config` are applied perform any additional processing required. The required transformations and and data types to cast to were identified by iteratively specifying the data types, catching errors and applying transformations to fix them.
