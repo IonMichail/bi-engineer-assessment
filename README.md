@@ -25,13 +25,15 @@ Parameters `date_from` & `date_to` are optional. If either is not specified then
 
 Each execution of the pipeline persists the metric results a table named `metrics` Previous results are overwriten.
 
+5. To inspect the results use the [results-nb](results-nb.ipynb) notebook. Use the .venv virtual environment as kernel
+
 
 ## Data Ingestion
 The data are ingested using the DuckDB function `read_csv` from Python. The data ingestion is a implemented as a two step procedure:
   1. Load each csv file as in memory and enforce column names and appropriate types. 
   2. Apply any (if required) data cleaning transformations and persist the files as tables in the database.
 
-The configurations of each source are specified on the `ingest.yaml` file. For each csv file there are two fields:
+The configurations of each source are specified on the  [ingest.yaml](ingest.yaml) file. For each csv file there are two fields:
     
     - load_config: A mapping of parameter values passed to the read_csv function
     - write_config: The table name to be created for the csv file and an optional mapping of transformations to apply to columns before inserting.
