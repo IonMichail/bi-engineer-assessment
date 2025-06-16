@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "bi-engineer-assessment"
+version = "0.1.0"
+description = ""
+authors = ["IonM <ionmihael71@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.10"
+duckdb = "*"
+pyyaml = "*"
+loguru = "*"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "*"
+ipykernel = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
