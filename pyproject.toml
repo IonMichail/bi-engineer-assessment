@@ -11,6 +11,9 @@ python = "^3.10"
 duckdb = "*"
 pyyaml = "*"
 loguru = "*"
+jupysql = "*"
+pandas = "2.2.1"
+duckdb-engine = "*"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "*"
