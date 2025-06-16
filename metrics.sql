@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS metrics;
+
+CREATE TABLE
+    metrics AS
 WITH
     manufactures_snapshot AS (
         SELECT
@@ -16,15 +20,15 @@ WITH
             ) t
         WHERE
             t.LastCreationDate <= t.FromDate
-        ORDER BY
-            CAST(t.CasinoManufacturerId AS INT)
     ),
     filtered_casino_daily AS (
-        SELECT * FROM 
+        SELECT
+            *
+        FROM
             casino_daily
         WHERE date BETWEEN $date_from AND $date_to
     ),
-    repricorcal_currency_rates AS (
+    all_currency_rates AS (
         SELECT
             date,
             FromCurrencyId AS FromCurrencyId,
@@ -45,14 +49,17 @@ WITH
         SELECT
             d.Date,
             d.UserID,
-            d.CurrencyId,
             u.Country,
             u.Sex,
-            u.BirthDate,
             DATEDIFF ('YEAR', u.BirthDate, d.Date) AS Age,
-            u.VIPStatus,
-            COALESCE(m.CasinoManufacturerName, 'Unknown') AS CasinoManufacturerName,
-            COALESCE(p.CasinoProviderName, 'Unknown') AS CasinoProviderName,
+            CASE
+                WHEN UPPER(u.VIPStatus) = 'NOT VIP' THEN UPPER(u.VIPStatus)
+                ELSE UPPER(
+                    REGEXP_REPLACE (u.VIPStatus, '(\b)*\s(\b)*', '', 'g')
+                )
+            END AS VIPStatus,
+            m.CasinoManufacturerName,
+            p.CasinoProviderName,
             d.GGR * r.ConversionRate AS GGR,
             d.Returns * r.ConversionRate AS Returns
         FROM
@@ -60,7 +67,7 @@ WITH
             LEFT JOIN manufactures_snapshot m on d.CasinomanufacturerId = m.CasinomanufacturerId
             INNER JOIN users u on u.user_id = d.UserID
             LEFT JOIN casino_providers p on d.CasinoProviderId = p.CasinoProviderId
-            INNER JOIN repricorcal_currency_rates r on d.CurrencyId = r.FromCurrencyId
+            INNER JOIN all_currency_rates r on d.CurrencyId = r.FromCurrencyId
             AND d.Date = r.Date
     ),
     granular_metrics_age_group as (
@@ -81,6 +88,7 @@ WITH
 SELECT
     Date,
     Country,
+    Sex,
     AgeGroup,
     VIPStatus,
     CasinoManufacturerName,
@@ -92,8 +100,12 @@ FROM
 GROUP BY
     Date,
     Country,
+    Sex,
     AgeGroup,
     VIPStatus,
     CasinoManufacturerName,
     CasinoProviderName
-ORDER BY Date, AGeGroup, VIPStatus
+ORDER BY
+    Date,
+    AGeGroup,
+    VIPStatus
