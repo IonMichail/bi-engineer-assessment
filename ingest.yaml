@@ -1,0 +1,72 @@
+sources:
+  - load_config:
+      path_or_buffer: data/casinodaily.csv
+      date_format: "%Y-%m-%d"
+      columns:
+        UserID: varchar
+        CountryId: varchar
+        CurrencyId: varchar
+        Date: date
+        CasinoGameId: varchar
+        CasinoProviderId: varchar
+        CasinoManufacturerId: varchar
+        GGR: float
+        Returns: float
+    write_config:
+      table: casino_daily
+
+  - load_config:
+      path_or_buffer: data/casinomanufacturers.csv
+      timestamp_format: "%Y-%m-%d %H:%M:%S.%f"
+      columns:
+        CasinoManufacturerId: varchar
+        CasinoManufacturerName: varchar
+        FromDate: timestamp
+        ToDate: timestamp
+        LatestFlag: varchar
+    write_config:
+      table: casino_manufacturers
+      transform:
+        CasinoManufacturerId: REPLACE(CasinoManufacturerId, '"', '')
+        CasinoManufacturerName: REPLACE(CasinoManufacturerName, '"', '')
+        LatestFlag: CAST(REPLACE(LatestFlag, '"', '') AS BOOL)
+
+  - load_config:
+      path_or_buffer: data/casinoproviders.csv
+      columns:
+        CasinoProviderId: varchar
+        CasinoProviderName: varchar
+    write_config:
+      table: casino_providers
+
+  - load_config:
+      path_or_buffer: data/currencyrates.csv
+      date_format: "%Y-%m-%d"
+      columns:
+        Date: date
+        FromCurrencyId: varchar
+        ToCurrencyId: varchar
+        ToCurrencySysname: varchar
+        EuroRate: float
+    write_config:
+      table: currency_rates
+
+  - load_config:
+      path_or_buffer: data/users.csv
+      date_format: "%Y-%m-%d"
+      columns:
+        UserID: varchar
+        user_id: varchar
+        BirthDate: date
+        Sex: varchar
+        VIPStatus: varchar
+        Country: varchar
+        CountryId: varchar
+    write_config:
+      table: users
+      transform:
+        user_id: REPLACE(user_id, '"', '')
+        VIPStatus: CASE
+          WHEN UPPER(VIPStatus) = 'NOT VIP' THEN UPPER(VIPStatus)
+          ELSE UPPER(REGEXP_REPLACE(VIPStatus, '(\b)*\s(\b)*', '', 'g'))
+          END
